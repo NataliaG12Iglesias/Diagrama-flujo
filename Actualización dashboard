@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujo BPMN - Dashboard Operaciones Waco Services</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 3px solid #e0e0e0;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.3s;
+            white-space: nowrap;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: #e8e8e8;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #2a5298;
+            border-bottom: 3px solid #2a5298;
+            margin-bottom: -3px;
+        }
+        
+        .content {
+            padding: 30px;
+            min-height: 600px;
+        }
+        
+        .diagram-container {
+            background: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .process { background: #4CAF50; }
+        .decision { background: #FFC107; }
+        .error { background: #f44336; }
+        .data { background: #2196F3; }
+        .notification { background: #9C27B0; }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #1e3c72;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: #1e3c72;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .metric-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 FLUJO BPMN - DASHBOARD OPERACIONES</h1>
+            <p>Sistema de Actualización y Control - Waco Services</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('general')">📊 Proceso General</button>
+            <button class="tab" onclick="showTab('diario')">📅 Proceso Diario</button>
+            <button class="tab" onclick="showTab('semanal')">📋 Proceso Semanal</button>
+            <button class="tab" onclick="showTab('mensual')">📈 Informe Mensual</button>
+            <button class="tab" onclick="showTab('proyecto')">🆕 Nuevo Proyecto</button>
+            <button class="tab" onclick="showTab('errores')">⚠️ Gestión Errores</button>
+            <button class="tab" onclick="showTab('raci')">👥 Matriz RACI</button>
+            <button class="tab" onclick="showTab('metricas')">📉 Métricas KPI</button>
+        </div>
+        
+        <div class="content" id="general">
+            <h2 class="section-title">Flujo Principal de Procesos</h2>
+            
+            <div class="info-box">
+                <h3>📌 Descripción General</h3>
+                <p>Este diagrama muestra la orquestación completa del sistema de actualización del Dashboard de Operaciones, con sus 4 procesos principales activados por diferentes triggers temporales o eventos.</p>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-icon process">P</div>
+                    <span>Proceso/Actividad</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon decision">?</div>
+                    <span>Decisión/Gateway</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon error">!</div>
+                    <span>Gestión de Errores</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon data">D</div>
+                    <span>Datos/Almacenamiento</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-icon notification">@</div>
+                    <span>Notificación/Comunicación</span>
+                </div>
+            </div>
+            
+            <div class="diagram-container">
+                <div class="mermaid">
+graph TB
+    Start([🚀 INICIO]) --> Timer{⏰ Trigger?}
+    
+    Timer -->|Diario 6PM| PD[📊 Extracción Diaria<br/>L-V 18:00]
+    Timer -->|Lunes 8AM| PS[📋 Consolidación Semanal<br/>Cierre semana anterior]
+    Timer -->|Día 1| PM[📈 Informe Mensual<br/>Análisis completo]
+    Timer -->|Evento| PN[🆕 Nuevo Proyecto<br/>Alta en sistema]
+    
+    PD --> SubPD[Subproceso:<br/>- Extraer ClickUp<br/>- Transformar datos<br/>- Validar códigos<br/>- Actualizar Sheets]
+    
+    PS --> SubPS[Subproceso:<br/>- Capturar faltantes<br/>- Calcular KPIs<br/>- Generar alertas<br/>- Enviar reportes]
+    
+    PM --> SubPM[Subproceso:<br/>- Consolidar mes<br/>- Generar presentación<br/>- Análisis detallado<br/>- Distribución]
+    
+    PN --> SubPN[Subproceso:<br/>- Crear estructura<br/>- Configurar tracking<br/>- Asignar recursos<br/>- Notificar equipo]
+    
+    SubPD --> ValidD{✓ Validación}
+    SubPS --> ValidS{✓ Validación}
+    SubPM --> ValidM{✓ Validación}
+    SubPN --> ValidN{✓ Validación}
+    
+    ValidD -->|❌| ErrorD[⚠️ Error Handler]
+    ValidD -->|✅| EndD([Fin Diario])
+    
+    ValidS -->|❌| ErrorS[⚠️ Error Handler]
+    ValidS -->|✅| NotifS[📧 Notificaciones<br/>Slack + Email]
+    
+    ValidM -->|❌| ErrorM[⚠️ Error Handler]
+    ValidM -->|✅| ReportM[📊 Distribuir<br/>Informe]
+    
+    ValidN -->|❌| ErrorN[⚠️ Error Handler]
+    ValidN -->|✅| EndN([Fin Alta])
+    
+    NotifS --> EndS([Fin Semanal])
+    ReportM --> EndM([Fin Mensual])
+    
+    ErrorD --> LogD[📝 Log Error]
+    ErrorS --> LogS[📝 Log Error]
+    ErrorM --> LogM[📝 Log Error]
+    ErrorN --> LogN[📝 Log Error]
+    
+    LogD --> EndD
+    LogS --> EndS
+    LogM --> EndM
+    LogN --> EndN
+    
+    style Start fill:#4CAF50,stroke:#45a049,stroke-width:3px,color:#fff
+    style Timer fill:#FFC107,stroke:#FFB300,stroke-width:2px
+    style PD fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
+    style PS fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
+    style PM fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
+    style PN fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
+    style ErrorD fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#fff
+    style ErrorS fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#fff
+    style ErrorM fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#fff
+    style ErrorN fill:#f44336,stroke:#d32f2f,stroke-width:2px,color:#fff
+    style NotifS fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    style ReportM fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff
+                </div>
+            </div>
+            
+            <h3 class="section-title">Tiempos de Ejecución Estimados</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">15-20 min</div>
+                    <div class="metric-label">Proceso Diario Automatizado</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">45-60 min</div>
+                    <div class="metric-label">Consolidación Semanal</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2-3 horas</div>
+                    <div class="metric-label">Informe Mensual</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">30 min</div>
+                    <div class="metric-label">Alta Nuevo Proyecto</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content" id="diario" style="display:none;">
+            <h2 class="section-title">Proceso Diario de Extracción</h2>
+            
+            <div class="info-box">
+                <h3>⏰ Ejecución: Lunes a Viernes - 18:00 hrs</h3>
+                <p>Proceso automatizado para extraer, validar y almacenar los registros de tiempo del día.</p>
+            </div>
+            
+            <h3>Pasos Detallados del Proceso:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Actividad</th>
+                        <th>Sistema</th>
+                        <th>Validación</th>
+                        <th>Tiempo Est.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Autenticación en ClickUp</td>
+                        <td>ClickUp API</td>
+                        <td>Token válido</td>
+                        <td>5 seg</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Acceder Dashboard1 (ID: rk90q-404)</td>
+                        <td>ClickUp</td>
+                        <td>Dashboard existe</td>
+                        <td>10 seg</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Configurar filtros (fecha actual, todo personal)</td>
+                        <td>ClickUp</td>
+                        <td>Filtros aplicados</td>
+                        <td>5 seg</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Extraer panel DIARIOS</td>
+                        <td>ClickUp API</td>
+                        <td>Datos recibidos</td>
+                        <td>30 seg</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Transformar datos (Macro CSVVersion4)</td>
+                        <td>n8n</td>
+                        <td>Formato correcto</td>
+                        <td>1 min</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Mapear campos (A-L)</td>
+                        <td>n8n</td>
+                        <td>Campos completos</td>
+                        <td>30 seg</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Convertir tiempos (ms a horas)</td>
+                        <td>n8n</td>
+                        <td>Cálculo correcto</td>
+                        <td>10 seg</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Validar códigos de proyecto</td>
+                        <td>n8n + Sheets</td>
+                        <td>Sin #N/A</td>
+                        <td>2 min</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Verificar duplicados</td>
+                        <td>Google Sheets</td>
+                        <td>Sin duplicados</td>
+                        <td>1 min</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Insertar en Tabla Maestra</td>
+                        <td>Google Sheets</td>
+                        <td>Datos insertados</td>
+                        <td>2 min</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Actualizar seguimiento</td>
+                        <td>Google Sheets</td>
+                        <td>Tracking actualizado</td>
+                        <td>30 seg</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Sincronización con Looker</td>
+                        <td>Looker</td>
+                        <td>Dashboard actualizado</td>
+                        <td>15 min</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Validaciones Críticas:</h3>
+            <ul>
+                <li>✅ Formato de código: XXXX [espacio] Nombre Actividad</li>
+                <li>✅ Conversión de tiempo: valor/3600000 para obtener horas</li>
+                <li>✅ Coincidencia de códigos con tabla de Relación de Actividades</li>
+                <li>✅ Verificación de registros previos para evitar duplicados</li>
+                <li>✅ Validación de referencias en columnas Z-AB</li>
+            </ul>
+        </div>
+        
+        <div class="content" id="semanal" style="display:none;">
+            <h2 class="section-title">Proceso de Consolidación Semanal</h2>
+            
+            <div class="info-box">
+                <h3>📅 Ejecución: Todos los Lunes - 08:00 hrs</h3>
+                <p>Consolidación de la semana anterior, cálculo de KPIs y envío de reportes a stakeholders.</p>
+            </div>
+            
+            <h3>Actividades Principales:</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">1️⃣</div>
+                    <div class="metric-label">Capturar registros faltantes</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2️⃣</div>
+                    <div class="metric-label">Validar diferencias</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">3️⃣</div>
+                    <div class="metric-label">Calcular KPIs semanales</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">4️⃣</div>
+                    <div class="metric-label">Generar alertas automáticas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">5️⃣</div>
+                    <div class="metric-label">Enviar a Slack</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">6️⃣</div>
+                    <div class="metric-label">Distribuir por Email</div>
+                </div>
+            </div>
+            
+            <h3>KPIs Calculados:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th>Fórmula</th>
+                        <th>Objetivo</th>
+                        <th>Alerta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rentabilidad Bruta</td>
+                        <td>((Ingresos - Costos) / Ingresos) × 100</td>
+                        <td>> 50%</td>
+                        <td>< 50% = Rojo</td>
+                    </tr>
+                    <tr>
+                        <td>Presupuesto Disponible</td>
+                        <td>Presupuesto Total - Costos Reales</td>
+                        <td>> 0</td>
+                        <td>< 0 = Rojo</td>
+                    </tr>
+                    <tr>
+                        <td>Desviación Horas</td>
+                        <td>Horas Estimadas - Horas Reales</td>
+                        <td>± 10%</td>
+                        <td>> 10% = Amarillo</td>
+                    </tr>
+                    <tr>
+                        <td>Días Restantes</td>
+                        <td>Fecha Entrega - Fecha Actual</td>
+                        <td>> 0</td>
+                        <td>< 0 = Rojo (Overdue)</td>
+                    </tr>
+                    <tr>
+                        <td>Capacidad Utilizada</td>
+                        <td>(Horas Trabajadas / Horas Disponibles) × 100</td>
+                        <td>80-90%</td>
+                        <td>> 100% = Rojo</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Formato de Notificaciones:</h3>
+            <div class="info-box">
+                <h4>📱 Mensaje Slack:</h4>
+                <ul>
+                    <li>Canal: #operaciones-waco-services</li>
+                    <li>Pantallazos de rentabilidad (Proyectos y Fees)</li>
+                    <li>@menciones para proyectos con alertas rojas</li>
+                    <li>Solicitud de confirmación de lectura</li>
+                </ul>
+                
+                <h4>📧 Email Semanal:</h4>
+                <ul>
+                    <li>Asunto: SEGUIMIENTO SERVICIOS (PROYECTOS Y FEE) - Semana [X]</li>
+                    <li>Link a Looker Dashboard</li>
+                    <li>Tablas con métricas principales</li>
+                    <li>Proyectos con retraso destacados</li>
+                    <li>Personal sin registro de tiempos</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content" id="mensual" style="display:none;">
+            <h2 class="section-title">Proceso de Informe Mensual</h2>
+            
+            <div class="info-box">
+                <h3>📊 Ejecución: Día 1 de cada mes - 09:00 hrs</h3>
+                <p>Generación del informe ejecutivo mensual con análisis detallado por departamento.</p>
+            </div>
+            
+            <h3>Estructura del Informe (18 Slides):</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Slide</th>
+                        <th>Contenido</th>
+                        <th>Fuente de Datos</th>
+                        <th>Análisis Requerido</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Rentabilidad General</td>
+                        <td>Proyectos CERRADOS del mes</td>
+                        <td>Tendencia vs mes anterior</td>
+                    </tr>
+                    <tr>
+                        <td>2-5</td>
+                        <td>Rentabilidad por Departamento</td>
+                        <td>Filtro por depto</td>
+                        <td>Comparativo entre deptos</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Desviación Costo/Hora General</td>
+                        <td>Todos los departamentos</td>
+                        <td>Identificar mayores desviaciones</td>
+                    </tr>
+                    <tr>
+                        <td>7-10</td>
+                        <td>Desviación por Departamento</td>
+                        <td>Desglose por cliente</td>
+                        <td>Clientes problemáticos</td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Días Restantes (Servicios Abiertos)</td>
+                        <td>Proyectos ABIERTOS</td>
+                        <td>Riesgos de retraso</td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Proyectos en Standby</td>
+                        <td>Estado STANDBY</td>
+                        <td>Razones de pausa</td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>Capacidad Utilizada General</td>
+                        <td>Personal nómina</td>
+                        <td>Eficiencia operativa</td>
+                    </tr>
+                    <tr>
+                        <td>14-17</td>
+                        <td>Capacidad por Departamento</td>
+                        <td>Filtro individual</td>
+                        <td>Sobrecarga/Subutilización</td>
+                    </tr>
+                    <tr>
+                        <td>18</td>
+                        <td>% Creators Histórico</td>
+                        <td>Tendencia acumulada</td>
+                        <td>Evolución outsourcing</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Proceso de Generación:</h3>
+            <ol>
+                <li>📁 Duplicar plantilla del mes anterior en Google Drive</li>
+                <li>🔍 Filtrar datos en Looker por período mensual</li>
+                <li>📸 Capturar visualizaciones de cada métrica</li>
+                <li>📝 Redactar análisis por slide (máx 3 bullets)</li>
+                <li>🎨 Ajustar formato y diseño</li>
+                <li>✅ Revisión con heads de departamento</li>
+                <li>📧 Distribución a directivos</li>
+            </ol>
+        </div>
+        
+        <div class="content" id="proyecto" style="display:none;">
+            <h2 class="section-title">Alta de Proyecto Nuevo</h2>
+            
+            <div class="info-box">
+                <h3>🆕 Trigger: Creación de nuevo proyecto en ClickUp o notificación manual</h3>
+                <p>Proceso completo para dar de alta un nuevo proyecto en el sistema de tracking.</p>
+            </div>
+            
+            <h3>Checklist de Creación:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>✓</th>
+                        <th>Tarea</th>
+                        <th>Responsable</th>
+                        <th>Sistema</th>
+                        <th>Validación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>☐</td>
+                        <td>Generar código OS único</td>
+                        <td>Sistema</td>
+                        <td>n8n</td>
+                        <td>Formato: XXXX-YYYY</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Crear estructura en ClickUp</td>
+                        <td>PM</td>
+                        <td>ClickUp</td>
+                        <td>Carpeta y listas creadas</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Registrar datos generales</td>
+                        <td>Business Ops</td>
+                        <td>Google Sheets</td>
+                        <td>Campos obligatorios completos</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Configurar presupuesto</td>
+                        <td>Business Ops</td>
+                        <td>Google Sheets</td>
+                        <td>Desglose por perfil</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Establecer cronograma</td>
+                        <td>PM</td>
+                        <td>ClickUp</td>
+                        <td>Fechas inicio y fin</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Asignar equipo</td>
+                        <td>Head Depto</td>
+                        <td>ClickUp</td>
+                        <td>Recursos confirmados</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Configurar alertas</td>
+                        <td>Sistema</td>
+                        <td>n8n</td>
+                        <td>Alertas activas</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Estado inicial: ABIERTO</td>
+                        <td>Sistema</td>
+                        <td>Google Sheets</td>
+                        <td>Visible en dashboard</td>
+                    </tr>
+                    <tr>
+                        <td>☐</td>
+                        <td>Notificar equipo</td>
+                        <td>Sistema</td>
+                        <td>Slack/Email</td>
+                        <td>Confirmación recibida</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Información Requerida:</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">📋</div>
+                    <div class="metric-label">Cliente y nombre del proyecto</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">💰</div>
+                    <div class="metric-label">Presupuesto total aprobado</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">📅</div>
+                    <div class="metric-label">Fecha inicio y entrega</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">👥</div>
+                    <div class="metric-label">PM y equipo asignado</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">🎯</div>
+                    <div class="metric-label">Entregables definidos</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">⚡</div>
+                    <div class="metric-label">Tipo: Proyecto o Fee</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content" id="errores" style="display:none;">
+            <h2 class="section-title">Sistema de Gestión de Errores</h2>
+            
+            <div class="info-box">
+                <h3>⚠️ Manejo Automatizado de Excepciones</h3>
+                <p>Protocolo de identificación, clasificación y resolución de errores en el proceso.</p>
+            </div>
+            
+            <h3>Clasificación de Errores:</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card" style="border-left: 4px solid #f44336;">
+                    <div class="metric-value">🔴 Alta</div>
+                    <div class="metric-label">
+                        <strong>Acción inmediata</strong><br>
+                        Detener proceso<br>
+                        Notificar Business Ops Lead<br>
+                        Corrección manual urgente
+                    </div>
+                </div>
+                <div class="metric-card" style="border-left: 4px solid #FFC107;">
+                    <div class="metric-value">🟡 Media</div>
+                    <div class="metric-label">
+                        <strong>Acción programada</strong><br>
+                        Agregar a cola<br>
+                        Procesar en batch<br>
+                        Revisar en próximo ciclo
+                    </div>
+                </div>
+                <div class="metric-card" style="border-left: 4px solid #4CAF50;">
+                    <div class="metric-value">🟢 Baja</div>
+                    <div class="metric-label">
+                        <strong>Solo registro</strong><br>
+                        Documentar en log<br>
+                        Revisión mensual<br>
+                        Mejora continua
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Tipos de Error y Resolución:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Ejemplo</th>
+                        <th>Resolución</th>
+                        <th>Severidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Código Inválido</td>
+                        <td>Código de proyecto no existe</td>
+                        <td>#N/A en columna H</td>
+                        <td>Verificar en ClickUp y corregir</td>
+                        <td>🟡 Media</td>
+                    </tr>
+                    <tr>
+                        <td>Datos Faltantes</td>
+                        <td>Campos obligatorios vacíos</td>
+                        <td>Sin responsable asignado</td>
+                        <td>Solicitar información al PM</td>
+                        <td>🟡 Media</td>
+                    </tr>
+                    <tr>
+                        <td>Duplicado</td>
+                        <td>Registro ya existe</td>
+                        <td>Tiempo registrado 2 veces</td>
+                        <td>Omitir registro duplicado</td>
+                        <td>🟢 Baja</td>
+                    </tr>
+                    <tr>
+                        <td>Sistema</td>
+                        <td>Falla de conexión/API</td>
+                        <td>ClickUp no responde</td>
+                        <td>Reintentar (max 3 veces)</td>
+                        <td>🔴 Alta</td>
+                    </tr>
+                    <tr>
+                        <td>Cálculo</td>
+                        <td>Error en fórmulas</td>
+                        <td>Rentabilidad > 100%</td>
+                        <td>Revisar fórmulas y datos</td>
+                        <td>🔴 Alta</td>
+                    </tr>
+                    <tr>
+                        <td>Sincronización</td>
+                        <td>Looker no actualiza</td>
+                        <td>Dashboard desactualizado</td>
+                        <td>Forzar refresh manual</td>
+                        <td>🟡 Media</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Protocolo de Escalamiento:</h3>
+            <ol>
+                <li>📝 <strong>Registro en Log:</strong> Timestamp, tipo, descripción, usuario afectado</li>
+                <li>🔍 <strong>Evaluación de Severidad:</strong> Aplicar matriz de clasificación</li>
+                <li>🔧 <strong>Intento de Resolución Automática:</strong> Según tipo de error</li>
+                <li>👤 <strong>Notificación si es necesaria:</strong> Según nivel de severidad</li>
+                <li>📊 <strong>Escalamiento si no se resuelve:</strong> A siguiente nivel jerárquico</li>
+                <li>✅ <strong>Documentación de Solución:</strong> Para prevenir recurrencia</li>
+            </ol>
+        </div>
+        
+        <div class="content" id="raci" style="display:none;">
+            <h2 class="section-title">Matriz RACI - Responsabilidades</h2>
+            
+            <div class="info-box">
+                <h3>👥 Distribución de Responsabilidades por Rol</h3>
+                <p>Definición clara de quién ejecuta, aprueba, es consultado o informado en cada actividad del proceso.</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Actividad</th>
+                        <th>Business Ops Lead</th>
+                        <th>PM/Líder Depto</th>
+                        <th>Operación</th>
+                        <th>IT Support</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Registro tiempos diarios</strong></td>
+                        <td>I</td>
+                        <td>A</td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>C</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Extracción datos ClickUp</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>I</td>
+                        <td>-</td>
+                        <td>C</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Transformación datos</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>C</td>
+                        <td>-</td>
+                        <td>C</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Actualización Google Sheets</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>I</td>
+                        <td>-</td>
+                        <td>A</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cálculo KPIs</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>C</td>
+                        <td>I</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Validación códigos proyecto</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>A</td>
+                        <td>C</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Envío notificaciones semanales</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>I</td>
+                        <td>I</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Generación informe mensual</strong></td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>A</td>
+                        <td>C</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alta proyecto nuevo</strong></td>
+                        <td>C</td>
+                        <td style="background:#e8f5e9">R</td>
+                        <td>I</td>
+                        <td>C</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gestión de errores</strong></td>
+                        <td>A</td>
+                        <td>C</td>
+                        <td>I</td>
+                        <td style="background:#e8f5e9">R</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mantenimiento sistema</strong></td>
+                        <td>C</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td style="background:#e8f5e9">R</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="legend" style="margin-top: 20px;">
+                <div class="legend-item">
+                    <strong>R</strong> = Responsable (ejecuta la tarea)
+                </div>
+                <div class="legend-item">
+                    <strong>A</strong> = Aprobador (autoriza/valida)
+                </div>
+                <div class="legend-item">
+                    <strong>C</strong> = Consultado (proporciona info)
+                </div>
+                <div class="legend-item">
+                    <strong>I</strong> = Informado (recibe updates)
+                </div>
+            </div>
+            
+            <h3>Contactos Clave:</h3>
+            <div class="info-box">
+                <ul>
+                    <li><strong>Business Operations Lead:</strong> ngutierrez@wacoservices.com</li>
+                    <li><strong>Canal Slack Operaciones:</strong> #operaciones-waco-services</li>
+                    <li><strong>Canal Slack Alertas Técnicas:</strong> #tech-alerts</li>
+                    <li><strong>Soporte IT:</strong> soporte@wacoservices.com</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content" id="metricas" style="display:none;">
+            <h2 class="section-title">Métricas y KPIs del Sistema</h2>
+            
+            <div class="info-box">
+                <h3>📊 Indicadores Clave de Desempeño</h3>
+                <p>Métricas monitoreadas automáticamente para asegurar la salud operativa del negocio.</p>
+            </div>
+            
+            <h3>KPIs Principales:</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">50%</div>
+                    <div class="metric-label">Rentabilidad Objetivo<br><small>Mínimo aceptable por proyecto</small></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">85%</div>
+                    <div class="metric-label">Capacidad Óptima<br><small>Utilización de recursos</small></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">±10%</div>
+                    <div class="metric-label">Desviación Aceptable<br><small>En horas y costos</small></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">100%</div>
+                    <div class="metric-label">Registro Diario<br><small>Cumplimiento de timesheet</small></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Días Overdue<br><small>Proyectos en tiempo</small></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value"><5%</div>
+                    <div class="metric-label">Proyectos Standby<br><small>Máximo aceptable</small></div>
+                </div>
+            </div>
+            
+            <h3>Fórmulas de Cálculo:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Fórmula</th>
+                        <th>Frecuencia</th>
+                        <th>Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Rentabilidad Bruta</strong></td>
+                        <td>((Ingresos - Costos Totales) / Ingresos) × 100</td>
+                        <td>Semanal</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Costo Operación Interna</strong></td>
+                        <td>Σ(Horas trabajadas × Costo/hora por persona)</td>
+                        <td>Diario</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Presupuesto Disponible</strong></td>
+                        <td>Presupuesto Aprobado - Costos Acumulados</td>
+                        <td>Semanal</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desviación Horas</strong></td>
+                        <td>((Horas Reales - Horas Estimadas) / Horas Estimadas) × 100</td>
+                        <td>Semanal</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Días Restantes</strong></td>
+                        <td>Fecha Entrega - Fecha Actual</td>
+                        <td>Diario</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Capacidad Utilizada</strong></td>
+                        <td>(Horas Asignadas / (Días Laborales × 8)) × 100</td>
+                        <td>Semanal</td>
+                        <td>Sistema</td>
+                    </tr>
+                    <tr>
+                        <td><strong>% Creators</strong></td>
+                        <td>(Costo Creators / Costo Total) × 100</td>
+                        <td>Mensual</td>
+                        <td>Business Ops</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Dashboard de Monitoreo:</h3>
+            <div class="info-box">
+                <h4>Enlaces a Dashboards:</h4>
+                <ul>
+                    <li>📊 <strong>Dashboard Principal:</strong> ID: a4e5d063-a0f9-41c8-bb5d-b946eb66e41f</li>
+                    <li>📈 <strong>Informe Mensual:</strong> ID: 38b8b1c0-6bc5-4d65-822d-6ffaf73c4a8c</li>
+                    <li>📋 <strong>ClickUp Dashboard1:</strong> ID: rk90q-404</li>
+                    <li>📁 <strong>Google Sheets Origen:</strong> ID: 1l_nokT9SXPc60rtNBo1SEbp0cFcITMLWI9y9-Pf5c6U</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Inicializar Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#2196F3',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#1976D2',
+                lineColor: '#5a5a5a',
+                secondaryColor: '#FFC107',
+                tertiaryColor: '#4CAF50'
+            }
+        });
+        
+        // Función para cambiar tabs
+        function showTab(tabName) {
+            // Ocultar todos los contenidos
+            const contents = document.querySelectorAll('.content');
+            contents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Quitar active de todos los tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar contenido seleccionado
+            document.getElementById(tabName).style.display = 'block';
+            
+            // Activar tab seleccionado
+            event.target.classList.add('active');
+            
+            // Re-renderizar diagramas Mermaid si es necesario
+            if (tabName === 'general') {
+                mermaid.init();
+            }
+        }
+    </script>
+</body>
+</html>
